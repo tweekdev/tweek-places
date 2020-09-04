@@ -15,7 +15,7 @@ import Users from './user/pages/Users';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState();
+  const [userId, setUserId] = useState(false);
 
   const login = useCallback((uid) => {
     setIsLoggedIn(true);

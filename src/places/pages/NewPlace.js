@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import Button from '../../shared/components/FormElements/Button';
+import ImageUpload from '../../shared/components/FormElements/ImageUpload';
 import Input from '../../shared/components/FormElements/Input';
 import ErrorModal from '../../shared/components/UIElements/ErrorModal';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
@@ -18,27 +19,23 @@ const NewPlace = () => {
       title: { value: '', isValid: false },
       description: { value: '', isValid: false },
       address: { value: '', isValid: false },
+      image: { value: '', isValid: false },
     },
     false
   );
-
   const history = useHistory();
 
   const placeSubmitHandler = async (event) => {
     event.preventDefault();
     console.log(formState.inputs); // send this to the backend !!
     try {
-      sendRequest(
-        'http://localhost:5000/api/places',
-        'POST',
-        JSON.stringify({
-          title: formState.inputs.title.value,
-          description: formState.inputs.description.value,
-          address: formState.inputs.address.value,
-          creator: auth.userId,
-        }),
-        { 'Content-Type': 'application/json' }
-      );
+      const formData = new FormData();
+      formData.append('title', formState.inputs.title.value);
+      formData.append('description', formState.inputs.description.value);
+      formData.append('address', formState.inputs.address.value);
+      formData.append('creator', auth.userId);
+      formData.append('image', formState.inputs.image.value);
+      sendRequest('http://localhost:5000/api/places', 'POST', formData);
       history.push('/');
     } catch (e) {}
   };
@@ -74,6 +71,14 @@ const NewPlace = () => {
           errorText='Please enter a valid address.'
           onInput={inputHandler}
         ></Input>
+
+        <ImageUpload
+          center
+          onInput={inputHandler}
+          id='image'
+          errorText='Please provide an image.'
+        ></ImageUpload>
+
         <Button type='submit' disabled={!formState.isValid}>
           ADD PLACE
         </Button>

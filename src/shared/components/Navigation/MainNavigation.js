@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import Backdrop from "../UIElements/Backdrop";
-import MainHeader from "./MainHeader";
-import "./MainNavigation.css";
-import NavLinks from "./NavLinks";
-import SideDrawer from "./SideDrawer";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Backdrop from '../UIElements/Backdrop';
+import MainHeader from './MainHeader';
+import './MainNavigation.css';
+import NavLinks from './NavLinks';
+import SideDrawer from './SideDrawer';
 const MainNavigation = () => {
   const [drawerIsOpen, setDrawerIsOpen] = useState(false);
 
@@ -33,7 +33,7 @@ const MainNavigation = () => {
           <span></span>
         </button>
         <h1 className='main-navigation__title'>
-          <Link to='/'>YourPlaces</Link>
+          <Link to='/'>TweekPlaces</Link>
         </h1>
         <nav className='main-navigation__header-nav'>
           <NavLinks></NavLinks>

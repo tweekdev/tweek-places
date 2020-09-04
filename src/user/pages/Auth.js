@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import Button from '../../shared/components/FormElements/Button';
+import ImageUpload from '../../shared/components/FormElements/ImageUpload';
 import Input from '../../shared/components/FormElements/Input';
 import Card from '../../shared/components/UIElements/Card';
 import ErrorModal from '../../shared/components/UIElements/ErrorModal';
@@ -39,6 +40,7 @@ const Auth = () => {
         {
           ...formState.inputs,
           name: undefined,
+          image: undefined,
         },
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -48,6 +50,10 @@ const Auth = () => {
           ...formState.inputs,
           name: {
             value: '',
+            isValid: false,
+          },
+          image: {
+            value: null,
             isValid: false,
           },
         },
@@ -77,24 +83,21 @@ const Auth = () => {
       } catch (err) {}
     } else {
       try {
+        const formData = new FormData();
+        formData.append('email', formState.inputs.email.value);
+        formData.append('name', formState.inputs.name.value);
+        formData.append('password', formState.inputs.password.value);
+        formData.append('image', formState.inputs.image.value);
         const responseData = await sendRequest(
           'http://localhost:5000/api/users/signup',
           'POST',
-          JSON.stringify({
-            name: formState.inputs.name.value,
-            email: formState.inputs.email.value,
-            password: formState.inputs.password.value,
-          }),
-          {
-            'Content-Type': 'application/json',
-          }
+          formData
         );
 
         auth.login(responseData.user.id);
       } catch (err) {}
     }
   };
-
   return (
     <React.Fragment>
       <ErrorModal error={error} onClear={clearError} />
@@ -113,6 +116,14 @@ const Auth = () => {
               errorText='Please enter a name.'
               onInput={inputHandler}
             />
+          )}
+          {!isLoginMode && (
+            <ImageUpload
+              center
+              onInput={inputHandler}
+              errorText='Please provide an image.'
+              id='image'
+            ></ImageUpload>
           )}
           <Input
             element='input'

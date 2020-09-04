@@ -13,19 +13,18 @@ const UsersList = (props) => {
       </div>
     );
   }
+
   return (
     <ul className='users-list'>
-      {props.items.map((user) => {
-        return (
-          <UserItem
-            key={user.id}
-            id={user.id}
-            name={user.name}
-            image={user.image}
-            placeCount={user.places.length}
-          ></UserItem>
-        );
-      })}
+      {props.items.map((user) => (
+        <UserItem
+          key={user.id}
+          id={user.id}
+          image={user.image}
+          name={user.name}
+          placeCount={user.places.length}
+        />
+      ))}
     </ul>
   );
 };
