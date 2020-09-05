@@ -16,18 +16,30 @@ const NewPlace = () => {
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [formState, inputHandler] = useForm(
     {
-      title: { value: '', isValid: false },
-      description: { value: '', isValid: false },
-      address: { value: '', isValid: false },
-      image: { value: '', isValid: false },
+      title: {
+        value: '',
+        isValid: false,
+      },
+      description: {
+        value: '',
+        isValid: false,
+      },
+      address: {
+        value: '',
+        isValid: false,
+      },
+      image: {
+        value: null,
+        isValid: false,
+      },
     },
     false
   );
+
   const history = useHistory();
 
   const placeSubmitHandler = async (event) => {
     event.preventDefault();
-    console.log(formState.inputs); // send this to the backend !!
     try {
       const formData = new FormData();
       formData.append('title', formState.inputs.title.value);
@@ -35,15 +47,18 @@ const NewPlace = () => {
       formData.append('address', formState.inputs.address.value);
       formData.append('creator', auth.userId);
       formData.append('image', formState.inputs.image.value);
-      sendRequest('http://localhost:5000/api/places', 'POST', formData);
+      await sendRequest('http://localhost:5000/api/places', 'POST', formData, {
+        Authorization: 'Bearer ' + auth.token,
+      });
       history.push('/');
-    } catch (e) {}
+    } catch (err) {}
   };
+
   return (
     <React.Fragment>
-      <ErrorModal error={error} onClear={clearError}></ErrorModal>
+      <ErrorModal error={error} onClear={clearError} />
       <form className='place-form' onSubmit={placeSubmitHandler}>
-        {isLoading && <LoadingSpinner asOverlay></LoadingSpinner>}
+        {isLoading && <LoadingSpinner asOverlay />}
         <Input
           id='title'
           element='input'
@@ -52,33 +67,29 @@ const NewPlace = () => {
           validators={[VALIDATOR_REQUIRE()]}
           errorText='Please enter a valid title.'
           onInput={inputHandler}
-        ></Input>
+        />
         <Input
           id='description'
           element='textarea'
-          type='text'
           label='Description'
           validators={[VALIDATOR_MINLENGTH(5)]}
-          errorText='Please enter a valid description. At least 5 characters.'
+          errorText='Please enter a valid description (at least 5 characters).'
           onInput={inputHandler}
-        ></Input>
+        />
         <Input
           id='address'
           element='input'
-          type='text'
           label='Address'
-          validators={[VALIDATOR_REQUIRE(6)]}
+          validators={[VALIDATOR_REQUIRE()]}
           errorText='Please enter a valid address.'
           onInput={inputHandler}
-        ></Input>
-
+        />
         <ImageUpload
-          center
-          onInput={inputHandler}
           id='image'
+          onInput={inputHandler}
           errorText='Please provide an image.'
-        ></ImageUpload>
-
+          center
+        />
         <Button type='submit' disabled={!formState.isValid}>
           ADD PLACE
         </Button>
