@@ -1,91 +1,56 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Redirect,
   Route,
   Switch,
 } from 'react-router-dom';
-import NewPlace from './places/pages/NewPlace';
-import UpdatePlace from './places/pages/UpdatePlace';
-import UserPlaces from './places/pages/UserPlaces';
 import MainNavigation from './shared/components/Navigation/MainNavigation';
+import LoadingSpinner from './shared/components/UIElements/LoadingSpinner';
 import { AuthContext } from './shared/context/auth-context';
-import Auth from './user/pages/Auth';
-import Users from './user/pages/Users';
+import { useAuth } from './shared/hooks/auth-hook';
+
+const Users = React.lazy(() => import('./user/pages/Users'));
+const NewPlace = React.lazy(() => import('./places/pages/NewPlace'));
+const UpdatePlace = React.lazy(() => import('./places/pages/UpdatePlace'));
+const UserPlaces = React.lazy(() => import('./places/pages/UserPlaces'));
+const Auth = React.lazy(() => import('./user/pages/Auth'));
 
 const App = () => {
-  const [token, setToken] = useState(false);
-  const [userId, setUserId] = useState(false);
-
-  const login = useCallback((uid, token, expirationDate) => {
-    setToken(token);
-    setUserId(uid);
-    const tokenExpirationDate =
-      expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
-    localStorage.setItem(
-      'userData',
-      JSON.stringify({
-        userId: uid,
-        token: token,
-        expiration: tokenExpirationDate.toISOString(),
-      })
-    );
-  }, []);
-
-  const logout = useCallback(() => {
-    setToken(token);
-    setUserId(null);
-    localStorage.removeItem('userData');
-  }, [token]);
-
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('userData'));
-    if (
-      storedData &&
-      storedData.token &&
-      new Date(storedData.expiration) > new Date()
-    ) {
-      login(
-        storedData.userId,
-        storedData.token,
-        new Date(storedData.expiration)
-      );
-    }
-  }, [login]);
-
+  const { token, login, logout, userId } = useAuth();
   let routes;
 
   if (token) {
     routes = (
       <Switch>
-        <Route path='/' exact>
+        <Route path="/" exact>
           <Users />
         </Route>
-        <Route path='/:userId/places' exact>
+        <Route path="/:userId/places" exact>
           <UserPlaces />
         </Route>
-        <Route path='/places/new' exact>
+        <Route path="/places/new" exact>
           <NewPlace />
         </Route>
-        <Route path='/places/:placeId'>
+        <Route path="/places/:placeId">
           <UpdatePlace />
         </Route>
-        <Redirect to='/' />
+        <Redirect to="/" />
       </Switch>
     );
   } else {
     routes = (
       <Switch>
-        <Route path='/' exact>
+        <Route path="/" exact>
           <Users />
         </Route>
-        <Route path='/:userId/places' exact>
+        <Route path="/:userId/places" exact>
           <UserPlaces />
         </Route>
-        <Route path='/auth'>
+        <Route path="/auth">
           <Auth />
         </Route>
-        <Redirect to='/auth' />
+        <Redirect to="/auth" />
       </Switch>
     );
   }
@@ -102,7 +67,17 @@ const App = () => {
     >
       <Router>
         <MainNavigation />
-        <main>{routes}</main>
+        <main>
+          <Suspense
+            fallback={
+              <div xclassName="center">
+                <LoadingSpinner></LoadingSpinner>
+              </div>
+            }
+          >
+            {routes}
+          </Suspense>
+        </main>
       </Router>
     </AuthContext.Provider>
   );
